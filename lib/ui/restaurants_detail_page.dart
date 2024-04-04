@@ -115,19 +115,29 @@ class _RestaurantsDetailPageState extends State<RestaurantsDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Foods:'),
-                          Text(
-                            widget.restaurant.menus.foods
-                                .map((food) => food.name)
-                                .toString(),
+                          Container(
+                            height: 150, // Atur tinggi sesuai kebutuhan
+                            child: ListView.builder(
+                              itemCount: widget.restaurant.menus.foods.length,
+                              itemBuilder: (context, index) {
+                                return Text(
+                                    widget.restaurant.menus.foods[index].name);
+                              },
+                            ),
                           ),
                           const SizedBox(
-                            height: 10,
+                            height: 5,
                           ),
                           const Text('Drinks:'),
-                          Text(
-                            widget.restaurant.menus.drinks
-                                .map((drink) => drink.name)
-                                .toString(),
+                          Container(
+                            height: 300, // Atur tinggi sesuai kebutuhan
+                            child: ListView.builder(
+                              itemCount: widget.restaurant.menus.drinks.length,
+                              itemBuilder: (context, index) {
+                                return Text(
+                                    widget.restaurant.menus.drinks[index].name);
+                              },
+                            ),
                           ),
                         ],
                       ),
