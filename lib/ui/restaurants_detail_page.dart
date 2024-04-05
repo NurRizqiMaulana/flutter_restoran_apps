@@ -1,153 +1,318 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_restoran_apps/models/restaurants.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_restoran_apps/data/api/api_service.dart';
+import 'package:flutter_restoran_apps/data/model/restaurants.dart';
+import 'package:flutter_restoran_apps/provider/get_detail_restaurants_provider.dart';
+import 'package:provider/provider.dart';
 
 class RestaurantsDetailPage extends StatefulWidget {
   static const routeName = '/restaurant_detail';
 
-  final Restaurant restaurant;
+  final String id;
 
-  const RestaurantsDetailPage({super.key, required this.restaurant});
+  const RestaurantsDetailPage({super.key, required this.id});
 
   @override
   State<RestaurantsDetailPage> createState() => _RestaurantsDetailPageState();
 }
 
 class _RestaurantsDetailPageState extends State<RestaurantsDetailPage> {
+  final _baseUrl = 'https://restaurant-api.dicoding.dev/images/large';
   bool isReadMore = false;
   int maxLine = 2;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: const Text(
-            "Detail Restaurant",
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.orange),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Hero(
-                tag: widget.restaurant.pictureId,
-                child: Image.network(widget.restaurant.pictureId)),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.restaurant.name,
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  Row(
-                    children: [
-                      Row(children: [
-                        const Icon(
-                          Icons.location_pin,
-                          color: Colors.red,
-                          size: 15,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(widget.restaurant.city)
-                      ]),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            color: Colors.yellow,
-                            size: 15,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(widget.restaurant.rating.toString())
-                        ],
-                      )
-                    ],
-                  ),
-                  const Divider(color: Colors.grey),
-                  Text('Deskripsi:',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    widget.restaurant.description,
-                    maxLines: maxLine,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                    textAlign: TextAlign.justify,
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isReadMore = !isReadMore;
-
-                              if (!isReadMore) {
-                                maxLine = 2;
-                              } else {
-                                maxLine = 50;
-                              }
-                            });
-                          },
-                          child: Text(isReadMore ? 'Read less' : 'Read more'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black, // Background color
-                          ),
-                        ),
-                      )),
-                  const Divider(
-                    color: Colors.grey,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Menu:'),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Column(
+    return ChangeNotifierProvider<GetDetailRestaurantProvider>(
+      create: (context) =>
+          GetDetailRestaurantProvider(apiService: ApiService(), id: widget.id),
+      child: Consumer<GetDetailRestaurantProvider>(
+        builder: (context, state, _) {
+          if (state.state == ResultState.loading) {
+            return const Material(
+              child: Center(
+                  child: CircularProgressIndicator(
+                color: Colors.orange,
+              )),
+            );
+          } else if (state.state == ResultState.hasData) {
+            var restaurant = state.result.restaurant;
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(restaurant.name),
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.orange,
+              ),
+              body: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Hero(
+                        tag: restaurant.pictureId,
+                        child:
+                            Image.network('$_baseUrl/${restaurant.pictureId}')),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Foods:'),
-                          Container(
-                            height: 150, // Atur tinggi sesuai kebutuhan
-                            child: ListView.builder(
-                              itemCount: widget.restaurant.menus.foods.length,
-                              itemBuilder: (context, index) {
-                                return Text(
-                                    widget.restaurant.menus.foods[index].name);
-                              },
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                child: Text(
+                                  restaurant.name,
+                                  textAlign: TextAlign.justify,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18.0,
+                                  ),
+                                ),
+                              ),
+                              Icon(Icons.favorite_border_outlined)
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Row(children: [
+                                const Icon(
+                                  Icons.location_pin,
+                                  color: Colors.red,
+                                  size: 15,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                    '${restaurant.address}, ${restaurant.city}')
+                              ]),
+                              const Spacer(),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const SizedBox(width: 5),
+                              Text(
+                                restaurant.rating.toString(),
+                              ),
+                              RatingBarIndicator(
+                                rating: restaurant.rating,
+                                itemBuilder: (context, index) => const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                                itemSize: 18,
+                              ),
+                            ],
+                          ),
+                          const Divider(color: Colors.grey),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Categories',
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           const SizedBox(
-                            height: 5,
+                            height: 10,
                           ),
-                          const Text('Drinks:'),
-                          Container(
-                            height: 300, // Atur tinggi sesuai kebutuhan
-                            child: ListView.builder(
-                              itemCount: widget.restaurant.menus.drinks.length,
-                              itemBuilder: (context, index) {
-                                return Text(
-                                    widget.restaurant.menus.drinks[index].name);
-                              },
+                          ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: restaurant.categories.length,
+                              itemBuilder: (_, index) {
+                                return Align(
+                                  alignment: Alignment.center,
+                                  child:
+                                      Text(restaurant.categories[index].name),
+                                );
+                              }),
+                          const Divider(color: Colors.grey),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'Description : ',
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                            child: Text(
+                              restaurant.description,
+                              textAlign: TextAlign.justify,
+                            ),
+                          ),
+                          const Divider(
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Menu',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    const Text(
+                                      'Foods:',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: restaurant.menus.foods.length,
+                                      itemBuilder: (_, index) {
+                                        return Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical:
+                                                    4), // Padding untuk jarak antara teks dan tepi kontainer
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical:
+                                                    8), // Padding agar teks tidak berdekatan dengan tepi kontainer
+                                            decoration: BoxDecoration(
+                                              color: Colors.orange[
+                                                  200], // Warna latar belakang
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              // Membuat sudut kontainer lebih melengkung
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  restaurant
+                                                      .menus.foods[index].name,
+                                                  style: const TextStyle(
+                                                      fontSize:
+                                                          16), // Ukuran teks
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                  child: Column(
+                                children: [
+                                  const Text('Drinks:'),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: restaurant.menus.drinks.length,
+                                    itemBuilder: (_, index) {
+                                      return Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical:
+                                                  4), // Padding untuk jarak antara teks dan tepi kontainer
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical:
+                                                  8), // Padding agar teks tidak berdekatan dengan tepi kontainer
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange[
+                                                200], // Warna latar belakang
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            // Membuat sudut kontainer lebih melengkung
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                restaurant
+                                                    .menus.drinks[index].name,
+                                                style: const TextStyle(
+                                                    fontSize:
+                                                        16), // Ukuran teks
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ))
+                            ],
+                          ),
+                          const Divider(color: Colors.grey),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Customer Review',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: restaurant.customerReviews.length,
+                            itemBuilder: (_, index) {
+                              return Align(
+                                alignment: Alignment.center,
+                                child: Column(
+                                  children: [
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                        restaurant.customerReviews[index].name),
+                                    Text(
+                                        restaurant.customerReviews[index].date),
+                                    Text(restaurant
+                                        .customerReviews[index].review),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ],
+                    )
+                  ],
+                ),
               ),
-            )
-          ],
-        ),
+            );
+          } else if (state.state == ResultState.noData) {
+            return const Material(
+                child: Center(child: Text('Gagal memuat data!')));
+          } else if (state.state == ResultState.error) {
+            return const Material(
+                child: Center(child: Text('Gagal memuat data!')));
+          } else {
+            return const Material(child: Text(''));
+          }
+        },
       ),
     );
   }

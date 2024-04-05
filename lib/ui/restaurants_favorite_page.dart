@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_restoran_apps/widgets/platform_widgets.dart';
 
-class RestaurantSerachPage extends StatelessWidget {
-  const RestaurantSerachPage({super.key});
+class RestaurantFavoritePage extends StatelessWidget {
+  const RestaurantFavoritePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,11 +19,7 @@ class RestaurantSerachPage extends StatelessWidget {
   Widget _buildAndroid(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Search Restaurant',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.orange,
+        title: const Text('Favorite'),
       ),
       body: _buildList(context),
     );

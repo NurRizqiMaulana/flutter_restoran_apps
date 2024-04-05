@@ -2,87 +2,61 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_restoran_apps/models/restaurants.dart';
-import 'package:flutter_restoran_apps/ui/restaurants_detail_page.dart';
+import 'package:flutter_restoran_apps/provider/get_list_restaurants_provider.dart';
+import 'package:flutter_restoran_apps/ui/restaurants_search.dart';
+import 'package:flutter_restoran_apps/ui/restaurants_favorite_page.dart';
+import 'package:flutter_restoran_apps/widgets/card_restaurant.dart';
 import 'package:flutter_restoran_apps/widgets/platform_widgets.dart';
+import 'package:provider/provider.dart';
 
-class RestaurantsListPage extends StatelessWidget {
-  static const routeName = '/restaurants_list';
-
+class RestaurantsListPage extends StatefulWidget {
   const RestaurantsListPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return PlatformWidget(androidBuilder: _buildAndroid, iosBuilder: _buildIos);
-  }
+  State<RestaurantsListPage> createState() => _RestaurantsListPageState();
+}
 
-  FutureBuilder<String> _buildList(BuildContext context) {
-    return FutureBuilder<String>(
-      future:
-          DefaultAssetBundle.of(context).loadString('assets/restaurants.json'),
-      builder: (context, snapshot) {
-        List<Restaurant> restaurants = parseRestaurant(snapshot.data);
-        return ListView.builder(
-            itemCount: restaurants.length,
-            itemBuilder: (context, index) {
-              return _buildRestaurantItem(context, restaurants[index]);
-            });
+class _RestaurantsListPageState extends State<RestaurantsListPage> {
+  Widget _buildList(BuildContext context) {
+    return Consumer<GetListRestaurantProvider>(
+      builder: (context, state, _) {
+        if (state.state == ResultState.loading) {
+          return const Center(
+              child: CircularProgressIndicator(
+            color: Colors.blue,
+          ));
+        } else if (state.state == ResultState.hasData) {
+          return ListView.builder(
+              shrinkWrap: true,
+              itemCount: state.result.restaurants.length,
+              itemBuilder: (context, index) {
+                var restaurant = state.result.restaurants[index];
+                return CardRestaurant(restaurant: restaurant);
+              });
+        } else if (state.state == ResultState.noData) {
+          return const Center(
+            child: Material(child: Text('Gagal memuat data!')),
+          );
+        } else if (state.state == ResultState.error) {
+          return const Center(
+            child: Material(
+              child: Text('Gagal memuat data!'),
+            ),
+          );
+        } else {
+          return const Center(
+            child: Material(
+              child: Text(''),
+            ),
+          );
+        }
       },
     );
   }
 
-  Widget _buildRestaurantItem(BuildContext context, Restaurant restaurant) {
-    return Material(
-      child: ListTile(
-        leading: Hero(
-          tag: restaurant.pictureId,
-          child: Image.network(
-            restaurant.pictureId,
-            width: 100,
-          ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: Text(
-              restaurant.name,
-              style: Theme.of(context).textTheme.titleLarge,
-            )),
-        subtitle: Column(
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.location_pin,
-                  color: Colors.red,
-                  size: 15,
-                ),
-                const SizedBox(width: 5),
-                Text(restaurant.city),
-              ],
-            ),
-            const SizedBox(
-              height: 8.0,
-            ),
-            Row(
-              children: [
-                const Icon(
-                  Icons.star,
-                  color: Colors.yellow,
-                  size: 15,
-                ),
-                const SizedBox(width: 5),
-                Text(restaurant.rating.toString()),
-              ],
-            ),
-          ],
-        ),
-        onTap: () {
-          Navigator.pushNamed(context, RestaurantsDetailPage.routeName,
-              arguments: restaurant);
-        },
-      ),
-    );
+  @override
+  Widget build(BuildContext context) {
+    return PlatformWidget(androidBuilder: _buildAndroid, iosBuilder: _buildIos);
   }
 
   Widget _buildAndroid(BuildContext context) {
@@ -92,6 +66,15 @@ class RestaurantsListPage extends StatelessWidget {
           'Restaurant App',
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showSearch(context: context, delegate: RestaurantSearch());
+            },
+            icon: const Icon(Icons.search),
+            color: Colors.white,
+          )
+        ],
         backgroundColor: Colors.orange,
       ),
       body: _buildList(context),

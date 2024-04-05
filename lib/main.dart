@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_restoran_apps/common/style.dart';
-import 'package:flutter_restoran_apps/models/restaurants.dart';
 import 'package:flutter_restoran_apps/ui/home_page.dart';
 import 'package:flutter_restoran_apps/ui/restaurants_detail_page.dart';
+import 'package:flutter_restoran_apps/ui/restaurants_favorite_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,8 +27,7 @@ class MyApp extends StatelessWidget {
         routes: {
           HomePage.routeName: (context) => const HomePage(),
           RestaurantsDetailPage.routeName: (context) => RestaurantsDetailPage(
-              restaurant:
-                  ModalRoute.of(context)?.settings.arguments as Restaurant)
+              id: ModalRoute.of(context)?.settings.arguments as String),
         });
   }
 }

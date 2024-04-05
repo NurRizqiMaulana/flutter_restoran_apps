@@ -3,9 +3,13 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_restoran_apps/common/style.dart';
-import 'package:flutter_restoran_apps/ui/restaurants_search_page.dart';
+import 'package:flutter_restoran_apps/data/api/api_service.dart';
+import 'package:flutter_restoran_apps/provider/get_list_restaurants_provider.dart';
+import 'package:flutter_restoran_apps/provider/search_restaurants_provider.dart';
 import 'package:flutter_restoran_apps/ui/restaurants_list_page.dart';
+import 'package:flutter_restoran_apps/ui/restaurants_favorite_page.dart';
 import 'package:flutter_restoran_apps/widgets/platform_widgets.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home_page';
@@ -47,7 +51,7 @@ class _HomePageState extends State<HomePage> {
       tabBuilder: (_, index) {
         switch (index) {
           case 1:
-            return const RestaurantSerachPage();
+            return const RestaurantFavoritePage();
           default:
             return const RestaurantsListPage();
         }
@@ -61,13 +65,20 @@ class _HomePageState extends State<HomePage> {
       label: "Home",
     ),
     BottomNavigationBarItem(
-      icon: Icon(Platform.isIOS ? CupertinoIcons.settings : Icons.search),
-      label: "Search",
+      icon: Icon(Platform.isIOS ? CupertinoIcons.settings : Icons.favorite),
+      label: "Favorite",
     ),
   ];
 
   final List<Widget> _listWidget = [
-    const RestaurantsListPage(),
-    const RestaurantSerachPage(),
+    ChangeNotifierProvider(
+      create: (_) => GetListRestaurantProvider(apiService: ApiService()),
+      child: const RestaurantsListPage(),
+    ),
+    const RestaurantFavoritePage(),
+    // ChangeNotifierProvider(
+    //   create: (_) => SearchRestaurantProvider(apiService: ApiService()),
+    //   child: const RestaurantSearchPage(),
+    // ),
   ];
 }
