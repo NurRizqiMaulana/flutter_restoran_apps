@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_restoran_apps/data/api/api_service.dart';
 import 'package:flutter_restoran_apps/data/model/restaurants.dart';
+import 'package:flutter_restoran_apps/provider/database_provider.dart';
 import 'package:flutter_restoran_apps/provider/get_detail_restaurants_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,10 @@ class RestaurantsDetailPage extends StatefulWidget {
 
   final String id;
 
-  const RestaurantsDetailPage({super.key, required this.id});
+  const RestaurantsDetailPage({
+    super.key,
+    required this.id,
+  });
 
   @override
   State<RestaurantsDetailPage> createState() => _RestaurantsDetailPageState();
@@ -68,6 +72,35 @@ class _RestaurantsDetailPageState extends State<RestaurantsDetailPage> {
                                     fontSize: 18.0,
                                   ),
                                 ),
+                              ),
+                              Consumer<DatabaseProvider>(
+                                builder: (context, provider, child) {
+                                  return FutureBuilder<bool>(
+                                    future: provider.isFavorited(restaurant.id),
+                                    builder: (context, snapshot) {
+                                      var isFavorited = snapshot.data ?? false;
+                                      return IconButton(
+                                        icon: Icon(
+                                          isFavorited
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                        ),
+                                        onPressed: () {
+                                          if (isFavorited) {
+                                            // Hapus dari favorit jika sudah ditandai sebagai favorit
+                                            provider
+                                                .removeFavorite(restaurant.id);
+                                          } else {
+                                            // Tambahkan ke favorit jika belum ditandai sebagai favorit
+                                            provider.addFavorite(
+                                                restaurant as Restaurant);
+                                          }
+                                          // Handle favorite button press
+                                        },
+                                      );
+                                    },
+                                  );
+                                },
                               ),
                               Icon(Icons.favorite_border_outlined)
                             ],

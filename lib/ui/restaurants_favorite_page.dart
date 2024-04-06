@@ -1,36 +1,62 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_restoran_apps/provider/database_provider.dart';
+import 'package:flutter_restoran_apps/utils/result_state.dart';
+import 'package:flutter_restoran_apps/widgets/card_restaurant.dart';
 import 'package:flutter_restoran_apps/widgets/platform_widgets.dart';
+import 'package:provider/provider.dart';
 
 class RestaurantFavoritePage extends StatelessWidget {
-  const RestaurantFavoritePage({super.key});
+  static const String favoriteTitle = 'Favorite';
 
-  @override
-  Widget build(BuildContext context) {
-    return PlatformWidget(androidBuilder: _buildAndroid, iosBuilder: _buildIos);
-  }
-
-  Widget _buildList(BuildContext context) {
-    return const Center(
-      child: Text('Coming soon!'),
-    );
-  }
+  const RestaurantFavoritePage({Key? key}) : super(key: key);
 
   Widget _buildAndroid(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorite'),
+        title: const Text(favoriteTitle),
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
       ),
-      body: _buildList(context),
+      body: _buildList(),
     );
   }
 
   Widget _buildIos(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Favorite'),
+        middle: Text(favoriteTitle),
       ),
-      child: _buildList(context),
+      child: _buildList(),
+    );
+  }
+
+  Widget _buildList() {
+    return Consumer<DatabaseProvider>(
+      builder: (context, provider, child) {
+        if (provider.state == ResultState.hasData) {
+          return ListView.builder(
+            itemCount: provider.favorite.length,
+            itemBuilder: (context, index) {
+              return CardRestaurant(restaurant: provider.favorite[index]);
+            },
+          );
+        } else {
+          return Center(
+            child: Material(
+              child: Text(provider.message),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PlatformWidget(
+      androidBuilder: _buildAndroid,
+      iosBuilder: _buildIos,
     );
   }
 }

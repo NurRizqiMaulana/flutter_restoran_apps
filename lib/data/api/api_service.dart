@@ -5,10 +5,10 @@ import 'package:flutter_restoran_apps/data/model/search_restaurants.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _baseUrl = 'https://restaurant-api.dicoding.dev';
+  static const String baseUrl = 'https://restaurant-api.dicoding.dev';
 
   Future<RestaurantsResult> getListRestaurant() async {
-    final response = await http.get(Uri.parse('$_baseUrl/list'));
+    final response = await http.get(Uri.parse('$baseUrl/list'));
     if (response.statusCode == 200) {
       return RestaurantsResult.fromJson(json.decode(response.body));
     } else {
@@ -17,7 +17,7 @@ class ApiService {
   }
 
   Future<DetailRestaurantsResult> getDetailRestaurant(id) async {
-    final response = await http.get(Uri.parse('$_baseUrl/detail/$id'));
+    final response = await http.get(Uri.parse('$baseUrl/detail/$id'));
     if (response.statusCode == 200) {
       return DetailRestaurantsResult.fromJson(json.decode(response.body));
     } else {
@@ -26,7 +26,7 @@ class ApiService {
   }
 
   Future<SearchRestaurantResult> searchRestaurant(query) async {
-    final response = await http.get(Uri.parse('$_baseUrl/search?q=$query'));
+    final response = await http.get(Uri.parse('$baseUrl/search?q=$query'));
     if (response.statusCode == 200) {
       return SearchRestaurantResult.fromJson(json.decode(response.body));
     } else {
