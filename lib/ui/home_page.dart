@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_restoran_apps/common/style.dart';
@@ -82,7 +82,8 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _listWidget = [
     ChangeNotifierProvider(
-      create: (_) => GetListRestaurantProvider(apiService: ApiService()),
+      create: (_) => GetListRestaurantProvider(
+          apiService: ApiService(client: http.Client())),
       child: const RestaurantsListPage(),
     ),
     const RestaurantFavoritePage(),

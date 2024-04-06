@@ -7,6 +7,9 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const String baseUrl = 'https://restaurant-api.dicoding.dev';
 
+  http.Client client;
+  ApiService({required this.client});
+
   Future<RestaurantsResult> getListRestaurant() async {
     final response = await http.get(Uri.parse('$baseUrl/list'));
     if (response.statusCode == 200) {

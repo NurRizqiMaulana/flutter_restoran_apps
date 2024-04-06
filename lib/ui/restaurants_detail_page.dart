@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_restoran_apps/data/api/api_service.dart';
@@ -29,8 +30,8 @@ class _RestaurantsDetailPageState extends State<RestaurantsDetailPage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<GetDetailRestaurantProvider>(
-      create: (context) =>
-          GetDetailRestaurantProvider(apiService: ApiService(), id: widget.id),
+      create: (context) => GetDetailRestaurantProvider(
+          apiService: ApiService(client: http.Client()), id: widget.id),
       child: Consumer<GetDetailRestaurantProvider>(
         builder: (context, state, _) {
           if (state.state == ResultState.loading) {

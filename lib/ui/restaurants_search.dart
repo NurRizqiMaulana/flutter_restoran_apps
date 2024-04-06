@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_restoran_apps/data/api/api_service.dart';
 import 'package:flutter_restoran_apps/provider/search_restaurants_provider.dart';
@@ -29,8 +30,8 @@ class RestaurantSearch extends SearchDelegate {
   @override
   Widget buildResults(BuildContext context) {
     return ChangeNotifierProvider<SearchRestaurantProvider>(
-      create: (context) =>
-          SearchRestaurantProvider(apiService: ApiService(), query: query),
+      create: (context) => SearchRestaurantProvider(
+          apiService: ApiService(client: http.Client()), query: query),
       child: Consumer<SearchRestaurantProvider>(builder: (context, state, _) {
         if (state.state == ResultState.loading) {
           return const Center(
